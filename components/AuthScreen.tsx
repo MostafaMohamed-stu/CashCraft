@@ -1,0 +1,394 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { useRouter } from "next/navigation"
+import { useApp } from "@/contexts/AppContext"
+import { translations } from "@/lib/translations"
+import { apiLogin, apiRegister } from "@/lib/api"
+
+type AuthMode = "login" | "register"
+
+interface AuthScreenProps {
+  initialMode: AuthMode
+  wallpaperUrl?: string // used for login by default
+  registerWallpaperUrl?: string
+}
+
+export function AuthScreen({ initialMode, wallpaperUrl = "/auth-wallpaper.jpg", registerWallpaperUrl }: AuthScreenProps) {
+  const router = useRouter()
+  const { language, currentUser, refreshUser, setCurrentUser } = useApp()
+  const t = translations[language]
+  const [mode, setMode] = useState<AuthMode>(initialMode)
+
+  // keep RTL/LTR in sync
+  useEffect(() => {
+    document.documentElement.dir = language === "ar" ? "rtl" : "ltr"
+  }, [language])
+
+  const isLogin = mode === "login"
+  const [email, setEmail] = useState("")
+  const [username, setUsername] = useState("")
+  const [displayName, setDisplayName] = useState("")
+  const [phoneNumber, setPhoneNumber] = useState("")
+  const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const containerVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.45 } },
+    exit: { opacity: 0, y: -20, transition: { duration: 0.35 } },
+  }
+
+  const loginBg = wallpaperUrl || "/auth-wallpaper.jpg"
+  const registerBg = registerWallpaperUrl || wallpaperUrl || "/auth-wallpaper.jpg"
+
+  async function handleLogin() {
+    setError(null)
+    setSubmitting(true)
+    try {
+      console.log("AuthScreen - Starting login process")
+      const { accessToken, refreshToken } = await apiLogin(email, password)
+      console.log("AuthScreen - Login successful, tokens received")
+      localStorage.setItem("cashcraft_accessToken", accessToken)
+      localStorage.setItem("cashcraft_refreshToken", refreshToken)
+      console.log("AuthScreen - Tokens stored, extracting user data from token")
+      // Extract user data from the JWT token
+      try {
+        const tokenParts = accessToken.split('.')
+        if (tokenParts.length === 3) {
+          const tokenData = JSON.parse(atob(tokenParts[1]))
+          console.log("AuthScreen - Token data:", tokenData)
+          const userData = {
+            id: tokenData.sub || tokenData.userId || Date.now().toString(),
+            email: tokenData.email || email,
+            username: tokenData.username || tokenData.name || email.split('@')[0],
+            displayName: tokenData.name || tokenData.displayName || email.split('@')[0],
+            role: tokenData.role || "user",
+            isPremium: tokenData.isPremium || false,
+            createdAt: tokenData.createdAt || new Date().toISOString()
+          }
+          setCurrentUser(userData)
+          localStorage.setItem("cashcraft_user", JSON.stringify(userData))
+          console.log("AuthScreen - User data extracted from token:", userData)
+        } else {
+          throw new Error("Invalid token format")
+        }
+      } catch (tokenError) {
+        console.log("AuthScreen - Failed to extract user data from token, using fallback:", tokenError)
+        // Fallback: use email as display name
+        const userData = {
+          id: Date.now().toString(),
+          email: email,
+          username: email.split('@')[0],
+          displayName: email.split('@')[0],
+          role: "user",
+          isPremium: false,
+          createdAt: new Date().toISOString()
+        }
+        setCurrentUser(userData)
+        localStorage.setItem("cashcraft_user", JSON.stringify(userData))
+        console.log("AuthScreen - Fallback user data set:", userData)
+      }
+      router.push("/dashboard")
+    } catch (e: any) {
+      console.log("AuthScreen - Login error:", e)
+      setError(e?.message || "Login failed")
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  async function handleRegister() {
+    setError(null)
+    if (password !== confirmPassword) {
+      setError(t.enterConfirmPassword || "Passwords do not match")
+      return
+    }
+    if (!username.trim()) {
+      setError("Username is required")
+      return
+    }
+    if (!displayName.trim()) {
+      setError("Display name is required")
+      return
+    }
+    setSubmitting(true)
+    try {
+      console.log("Attempting registration with:", { email, username, displayName, phoneNumber })
+      
+      const response = await apiRegister(email, username, password, displayName, phoneNumber)
+      console.log("Registration response:", response)
+      
+      // Registration should always return tokens now
+      if (response.accessToken && response.refreshToken) {
+        console.log("Registration successful with tokens")
+        localStorage.setItem("cashcraft_accessToken", response.accessToken)
+        localStorage.setItem("cashcraft_refreshToken", response.refreshToken)
+        
+        // Extract user data from the JWT token (same as login)
+        console.log("AuthScreen - Extracting user data from token")
+        try {
+          const tokenParts = response.accessToken.split('.')
+          if (tokenParts.length === 3) {
+            const tokenData = JSON.parse(atob(tokenParts[1]))
+            console.log("AuthScreen - Token data from registration:", tokenData)
+            const userData = {
+              id: tokenData.sub || tokenData.nameid || Date.now().toString(),
+              email: tokenData.email || email,
+              username: username,
+              displayName: displayName,
+              role: tokenData.role || "user",
+              isPremium: tokenData.isPremium || false,
+              createdAt: tokenData.createdAt || new Date().toISOString()
+            }
+            setCurrentUser(userData)
+            localStorage.setItem("cashcraft_user", JSON.stringify(userData))
+            console.log("AuthScreen - User data extracted from token:", userData)
+          } else {
+            throw new Error("Invalid token format")
+          }
+        } catch (tokenError) {
+          console.log("AuthScreen - Failed to extract user data from token, using fallback:", tokenError)
+          // Fallback: use registration form data
+          const userData = {
+            id: Date.now().toString(),
+            email: email,
+            username: username,
+            displayName: displayName,
+            role: "user",
+            isPremium: false,
+            createdAt: new Date().toISOString()
+          }
+          setCurrentUser(userData)
+          localStorage.setItem("cashcraft_user", JSON.stringify(userData))
+          console.log("AuthScreen - Fallback user data set:", userData)
+        }
+        
+        console.log("AuthScreen - Navigating to dashboard")
+        router.push("/dashboard")
+      } else {
+        console.log("Unexpected response format:", response)
+        setError("Registration completed but there was an issue. Please try logging in.")
+      }
+    } catch (e: any) {
+      console.log("Registration error:", e)
+      setError(e?.message || "Registration failed")
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  function handleLogout() {
+    localStorage.removeItem("cashcraft_accessToken")
+    localStorage.removeItem("cashcraft_refreshToken")
+    localStorage.removeItem("cashcraft_user")
+    setCurrentUser(null) // Clear user data immediately
+    setMode("login")
+  }
+
+  // Show user info if already logged in
+  if (currentUser) {
+    return (
+      <div className={`min-h-screen relative ${language === "ar" ? "rtl" : "ltr"}`} suppressHydrationWarning>
+        {/* Wallpaper background */}
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${loginBg})` }}
+          aria-hidden
+        />
+        {/* Overlay for readability */}
+        <div className="absolute inset-0 bg-black/50 dark:bg-black/60" aria-hidden />
+
+        <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-10">
+          <div className="w-full max-w-4xl grid md:grid-cols-2 gap-0 rounded-2xl overflow-hidden shadow-2xl">
+            {/* Left: brand / pitch */}
+            <div className="hidden md:flex flex-col justify-between bg-white/10 dark:bg-white/5 backdrop-blur-md p-8 text-white">
+              <div>
+                <h1 className="text-3xl font-bold mb-2">CashCraft</h1>
+                <p className="text-white/90">
+                  {t.smartMoneyDesc}
+                </p>
+              </div>
+              <div className="text-sm text-white/80">
+                {t.chooseYourPlan}
+              </div>
+            </div>
+
+            {/* Right: user info card */}
+            <div className="bg-white dark:bg-gray-900 p-8">
+              <div className="text-center space-y-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-[#084f5a] dark:text-white mb-2">
+                    Welcome back, {currentUser.displayName}!
+                  </h2>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    You are logged in as <span className="font-semibold">@{currentUser.username}</span>
+                  </p>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="text-left space-y-2">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <span className="font-medium">Email:</span> {currentUser.email}
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <span className="font-medium">Role:</span> {currentUser.role}
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <span className="font-medium">Member since:</span> {new Date(currentUser.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <Button 
+                    onClick={() => router.push("/dashboard")}
+                    className="flex-1 bg-[#6099a5] hover:bg-[#084f5a] text-white"
+                  >
+                    Go to Dashboard
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    onClick={handleLogout}
+                    className="border-[#6099a5] text-[#6099a5] hover:bg-[#6099a5] hover:text-white"
+                  >
+                    Logout
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className={`min-h-screen relative ${language === "ar" ? "rtl" : "ltr"}`} suppressHydrationWarning>
+      {/* Wallpaper background */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url(${isLogin ? loginBg : registerBg})` }}
+        aria-hidden
+      />
+      {/* Overlay for readability */}
+      <div className="absolute inset-0 bg-black/50 dark:bg-black/60" aria-hidden />
+
+      <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-10">
+        <div className="w-full max-w-4xl grid md:grid-cols-2 gap-0 rounded-2xl overflow-hidden shadow-2xl">
+          {/* Left: brand / pitch */}
+          <div className="hidden md:flex flex-col justify-between bg-white/10 dark:bg-white/5 backdrop-blur-md p-8 text-white">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">CashCraft</h1>
+              <p className="text-white/90">
+                {t.smartMoneyDesc}
+              </p>
+            </div>
+            <div className="text-sm text-white/80">
+              {t.chooseYourPlan}
+            </div>
+          </div>
+
+          {/* Right: auth card */}
+          <div className="bg-white dark:bg-gray-900 p-8">
+            {/* Toggle */}
+            <div className="flex items-center justify-between mb-8">
+              <div className="text-2xl font-bold text-[#084f5a] dark:text-white">
+                {isLogin ? t.welcomeBack : t.createAccount}
+              </div>
+              <Button
+                variant="outline"
+                className="border-[#6099a5] text-[#6099a5] hover:bg-[#6099a5] hover:text-white"
+                onClick={() => setMode(isLogin ? "register" : "login")}
+              >
+                {isLogin ? t.createNewAccount : t.signInHere}
+              </Button>
+            </div>
+
+            <div className="relative min-h-[320px]">
+              <AnimatePresence mode="wait" initial={false}>
+                {isLogin ? (
+                  <motion.div
+                    key="login"
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    className="space-y-5"
+                  >
+                    <div>
+                      <label className="block text-sm mb-2 text-gray-700 dark:text-gray-300">{t.email}</label>
+                      <Input type="email" placeholder={t.enterEmail} className="bg-white dark:bg-gray-800" value={email} onChange={(e) => setEmail(e.target.value)} />
+                    </div>
+                    <div>
+                      <label className="block text-sm mb-2 text-gray-700 dark:text-gray-300">{t.password}</label>
+                      <Input type="password" placeholder={t.enterPassword} className="bg-white dark:bg-gray-800" value={password} onChange={(e) => setPassword(e.target.value)} />
+                    </div>
+                    {error && <div className="text-red-600 dark:text-red-400 text-sm">{error}</div>}
+                    <Button className="w-full bg-[#6099a5] hover:bg-[#084f5a] text-white" onClick={handleLogin} disabled={submitting}>
+                      {t.signIn}
+                    </Button>
+                    <div className="text-center text-sm text-gray-600 dark:text-gray-400">
+                      {t.dontHaveAccount} <button className="text-[#6099a5]" onClick={() => setMode("register")}>{t.createNewAccount}</button>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="register"
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    className="space-y-5"
+                  >
+                    <div>
+                      <label className="block text-sm mb-2 text-gray-700 dark:text-gray-300">Email</label>
+                      <Input type="email" placeholder="Enter your email" className="bg-white dark:bg-gray-800" value={email} onChange={(e) => setEmail(e.target.value)} />
+                    </div>
+                    <div>
+                      <label className="block text-sm mb-2 text-gray-700 dark:text-gray-300">Username</label>
+                      <Input type="text" placeholder="Enter your username" className="bg-white dark:bg-gray-800" value={username} onChange={(e) => setUsername(e.target.value)} />
+                    </div>
+                    <div>
+                      <label className="block text-sm mb-2 text-gray-700 dark:text-gray-300">Display Name</label>
+                      <Input type="text" placeholder="Enter your display name" className="bg-white dark:bg-gray-800" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
+                    </div>
+                    <div>
+                      <label className="block text-sm mb-2 text-gray-700 dark:text-gray-300">Phone Number</label>
+                      <Input type="tel" placeholder="Enter your phone number" className="bg-white dark:bg-gray-800" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
+                    </div>
+                    <div>
+                      <label className="block text-sm mb-2 text-gray-700 dark:text-gray-300">Password</label>
+                      <Input type="password" placeholder="Enter your password" className="bg-white dark:bg-gray-800" value={password} onChange={(e) => setPassword(e.target.value)} />
+                    </div>
+                    <div>
+                      <label className="block text-sm mb-2 text-gray-700 dark:text-gray-300">Confirm Password</label>
+                      <Input type="password" placeholder="Confirm your password" className="bg-white dark:bg-gray-800" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+                    </div>
+                    {error && <div className="text-red-600 dark:text-red-400 text-sm">{error}</div>}
+                    <Button className="w-full bg-[#6099a5] hover:bg-[#084f5a] text-white" onClick={handleRegister} disabled={submitting}>
+                      {t.createAccount}
+                    </Button>
+                    <div className="text-center text-sm text-gray-600 dark:text-gray-400">
+                      {t.alreadyHaveAccount} <button className="text-[#6099a5]" onClick={() => setMode("login")}>{t.signInHere}</button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Where to put the wallpaper */}
+      {/* Place your image at: public/auth-wallpaper.jpg (or pass wallpaperUrl prop) */}
+    </div>
+  )
+}
+
+
