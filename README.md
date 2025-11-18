@@ -331,12 +331,6 @@ Contributions are welcome! Please follow these steps:
 - [Ziad El Farhy](https://github.com/ziadelfarhy)
 - [DEV-12AM](https://github.com/DEV-12AM)
 
-## 🙏 Acknowledgments
-
-- shadcn/ui for the component library
-- Next.js team for the amazing framework
-- All contributors and users
-
 ## 📞 Support
 
 For support, email cashcraft@gmail.com or open an issue in the repository.
