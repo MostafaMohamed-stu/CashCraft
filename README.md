@@ -308,12 +308,6 @@ cashcraft-nextjs/
 3. Set budget amount for each category
 4. Categories appear on dashboard with progress indicators
 
-## 🎨 Color Scheme
-
-- **Primary Color**: `#6099a5` (Teal)
-- **Accent Colors**: Various category colors
-- **Background**: Light/Dark mode support
-
 ## 📸 Screenshots
 
 *Add screenshots of your application here*
@@ -327,10 +321,6 @@ Contributions are welcome! Please follow these steps:
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
-
-## 📝 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## 👥 Authors
 
@@ -349,7 +339,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 📞 Support
 
-For support, email your-email@example.com or open an issue in the repository.
+For support, email cashcraft@gmail.com or open an issue in the repository.
 
 ---
 
