@@ -15,77 +15,71 @@
 <div align="center">
 
 ### Our Amazing Team
+
 <table>
   <tr>
-    <!-- Contributor 1 -->
-    <td align="center">
+    <td align="center" valign="top">
       <a href="https://github.com/MostafaMohamed-stu">
-        <img src="https://github.com/MostafaMohamed-stu.png?size=150" width="120" alt="Mostafa Mohamed"/>
+        <img src="https://github.com/MostafaMohamed-stu.png?size=150" width="150px;" style="border-radius: 50%; border: 3px solid #6099a5; padding: 2px;" alt="Mostafa Mohamed"/>
         <br />
-        <sub><b>Mostafa Mohamed</b></sub>
+        <sub style="font-size: 16px; font-weight: bold; color: #6099a5;"><b>Mostafa Mohamed</b></sub>
       </a>
       <br />
-      <a href="https://github.com/MostafaMohamed-stu">
+      <a href="https://github.com/MostafaMohamed-stu" title="GitHub Profile">
         <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"/>
       </a>
     </td>
-
-    <!-- Contributor 2 -->
-    <td align="center">
+    <td align="center" valign="top">
       <a href="https://github.com/kyouka0">
-        <img src="https://github.com/kyouka0.png?size=150" width="120" alt="kyouka0"/>
+        <img src="https://github.com/kyouka0.png?size=150" width="150px;" style="border-radius: 50%; border: 3px solid #6099a5; padding: 2px;" alt="kyouka0"/>
         <br />
-        <sub><b>kyouka0</b></sub>
+        <sub style="font-size: 16px; font-weight: bold; color: #6099a5;"><b>kyouka0</b></sub>
       </a>
       <br />
-      <a href="https://github.com/kyouka0">
+      <a href="https://github.com/kyouka0" title="GitHub Profile">
         <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"/>
       </a>
     </td>
-
-    <!-- Contributor 3 -->
-    <td align="center">
+    <td align="center" valign="top">
       <a href="https://github.com/HabibaAmrhu">
-        <img src="https://github.com/HabibaAmrhu.png?size=150" width="120" alt="Habiba Amr"/>
+        <img src="https://github.com/HabibaAmrhu.png?size=150" width="150px;" style="border-radius: 50%; border: 3px solid #6099a5; padding: 2px;" alt="Habiba Amr"/>
         <br />
-        <sub><b>Habiba Amr</b></sub>
+        <sub style="font-size: 16px; font-weight: bold; color: #6099a5;"><b>Habiba Amr</b></sub>
       </a>
       <br />
-      <a href="https://github.com/HabibaAmrhu">
+      <a href="https://github.com/HabibaAmrhu" title="GitHub Profile">
         <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"/>
       </a>
     </td>
   </tr>
-
   <tr>
-    <!-- Contributor 4 -->
-    <td align="center">
+    <td align="center" valign="top">
       <a href="https://github.com/ziadelfarhy">
-        <img src="https://github.com/ziadelfarhy.png?size=150" width="120" alt="Ziad El Farhy"/>
+        <img src="https://github.com/ziadelfarhy.png?size=150" width="150px;" style="border-radius: 50%; border: 3px solid #6099a5; padding: 2px;" alt="Ziad El Farhy"/>
         <br />
-        <sub><b>Ziad El Farhy</b></sub>
+        <sub style="font-size: 16px; font-weight: bold; color: #6099a5;"><b>Ziad El Farhy</b></sub>
       </a>
       <br />
-      <a href="https://github.com/ziadelfarhy">
+      <a href="https://github.com/ziadelfarhy" title="GitHub Profile">
         <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"/>
       </a>
     </td>
-
-    <!-- Contributor 5 -->
-    <td align="center">
+    <td align="center" valign="top">
       <a href="https://github.com/DEV-12AM">
-        <img src="https://github.com/DEV-12AM.png?size=150" width="120" alt="DEV-12AM"/>
+        <img src="https://github.com/DEV-12AM.png?size=150" width="150px;" style="border-radius: 50%; border: 3px solid #6099a5; padding: 2px;" alt="DEV-12AM"/>
         <br />
-        <sub><b>DEV-12AM</b></sub>
+        <sub style="font-size: 16px; font-weight: bold; color: #6099a5;"><b>DEV-12AM</b></sub>
       </a>
       <br />
-      <a href="https://github.com/DEV-12AM">
+      <a href="https://github.com/DEV-12AM" title="GitHub Profile">
         <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"/>
       </a>
+    </td>
+    <td align="center" valign="top">
+      <!-- Empty cell for better alignment -->
     </td>
   </tr>
 </table>
-
 
 </div>
 
